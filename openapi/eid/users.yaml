@@ -1,0 +1,466 @@
+---
+openapi: 3.0.3
+info:
+  title: User API
+  description: |
+    User api to manage user data
+  contact:
+    name: developer@app
+    email: developer@app.io
+  version: 1.0.0
+servers:
+- url: https://api.app.io
+  description: The development user api
+- url: http://localhost:4010
+  description: localhost
+paths:
+  /v1/users/{id}:
+    options: # For api gateway CORS handling
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+      - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - user
+      summary: Get user by id
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        description: User ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserByIdResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      x-amazon-apigateway-integration:
+        uri: ${lambda_invoke_arn}
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        timeoutInMillis: ${lambda_timeout_millis}
+        type: aws_proxy
+        contentHandling: CONVERT_TO_TEXT
+  /v1/users/signup/email:
+    options: # For api gateway CORS handling
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+      - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - user
+      summary: Sign up with email
+      operationId: signupWithEmail
+      requestBody:
+        description: User info to sign up
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupWithEmailRequest'
+      responses:
+        "201":
+          description: User signed up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupWithEmailResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "401":
+          $ref: '#/components/responses/UnauthorizedError'
+        "403":
+          $ref: '#/components/responses/ForbiddenError'
+      x-amazon-apigateway-integration:
+        uri: ${lambda_invoke_arn}
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        timeoutInMillis: ${lambda_timeout_millis}
+        type: aws_proxy
+        contentHandling: CONVERT_TO_TEXT
+  /v1/users/signin/email:
+    options: # For api gateway CORS handling
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+      - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    post:
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - user
+      summary: Sign in with email
+      operationId: signinWithEmail
+      requestBody:
+        description: User info to sign in
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninWithEmailRequest'
+      responses:
+        "200":
+          description: User signed in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SigninWithEmailResponse'
+        "400":
+          $ref: '#/components/responses/BadRequestError'
+        "401":
+          $ref: '#/components/responses/UnauthorizedError'
+        "403":
+          $ref: '#/components/responses/ForbiddenError'
+      x-amazon-apigateway-integration:
+        uri: ${lambda_invoke_arn}
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        timeoutInMillis: ${lambda_timeout_millis}
+        type: aws_proxy
+        contentHandling: CONVERT_TO_TEXT
+  /v1/users:
+    options: # For api gateway CORS handling
+      summary: CORS support
+      description: |
+        Enable CORS by returning correct headers
+      tags:
+      - CORS
+      responses:
+        200:
+          description: Default response for CORS method
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+          content: {}
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+              method.response.header.Access-Control-Allow-Methods: '''GET,POST,OPTIONS'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: |
+                {}
+    get:
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - user
+      summary: Get users with pagination
+      operationId: getUsers
+      parameters:
+      - name: offset
+        in: query
+        description: The number of user to skip before starting to fetch
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          example: 5
+          default: 0
+      - name: limit
+        in: query
+        description: The amount of users
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 20
+          minimum: 1
+          type: integer
+          example: 5
+          default: 20
+      responses:
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUsersResponse'
+        "401":
+          $ref: '#/components/responses/UnauthorizedError'
+        "403":
+          $ref: '#/components/responses/ForbiddenError'
+      x-amazon-apigateway-integration:
+        uri: ${lambda_invoke_arn}
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        timeoutInMillis: ${lambda_timeout_millis}
+        type: aws_proxy
+        contentHandling: CONVERT_TO_TEXT
+components:
+  schemas:
+    SignupWithEmailRequest:
+      $ref: '#/components/schemas/SigninWithEmailRequest'
+    SignupWithEmailResponse:
+      $ref: '#/components/schemas/SigninWithEmailResponse'
+    SigninWithEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: app@test.io
+        password:
+          type: string
+          example: app_password
+    SigninWithEmailResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          example: app@test.io
+        password:
+          type: string
+          example: app_password
+        createdAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+        accessToken: 
+          type: string
+          example: access_token
+        refreshToken:
+          type: string
+          example: refresh_token
+    SigninOrSignupWithSocialRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          example: auth_code
+        provider:
+          type: string
+          example: google
+    SigninOrSignupWithSocialResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          example: app@test.io
+        password:
+          type: string
+          example: app_password
+        createdAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+        accessToken: 
+          type: string
+          example: access_token
+        refreshToken:
+          type: string
+          example: refresh_token 
+    GetUsersResponse: # TODO: Add pagination
+      type: object
+      properties:
+        users:
+          type: array
+          items: 
+            $ref: '#/components/schemas/User'
+    GetUserByIdResponse:
+      $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0"
+        email:
+          type: string
+          example: app@test.io
+        createdAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+        updatedAt:
+          type: string
+          example: "2020-01-01T00:00:00.000Z"
+      description: User model
+    ErrorResponseBody:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ERROR_CODE
+        message:
+          type: string
+          example: Error message
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header
+  responses: # Error responses
+    UnauthorizedError:
+        description: Authorization is invalid
+        headers:
+          WWW_Authenticate: # TODO: Check if this is necessary
+            schema:
+              type: string
+    ForbiddenError:
+        description: Access denied
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: ACCESS_DENIED
+                message:
+                  type: string
+                  example: User does not have access to this resource
+    BadRequestError:
+        description: Invalid request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: INVALID_REQUEST
+                message:
+                  type: string
+                  example: Invalid request
+    NotFoundError:
+        description: Resource not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: RESOURCE_NOT_FOUND
+                message:
+                  type: string
+                  example: Resource not found
